@@ -1,0 +1,55 @@
+# docker build --progress=plain . -t tomasz-lisowski/jcc:1.0.0 2>&1 | tee docker.log;
+# docker run -v <path_to_project>:/opt/main --tty --interactive --rm tomasz-lisowski/jcc:1.0.0;
+
+FROM debian:12.6-slim AS base
+
+FROM base AS download
+RUN set -o nounset -o errexit -o xtrace; \
+    apt-get -qq update; \
+    apt-get -qq --yes dist-upgrade; \
+    apt-get -qq --yes --no-install-recommends install locate wget ca-certificates tar unzip; \
+    mkdir /opt/lib; \
+    mkdir /opt/tmp; \
+    cd /opt/tmp; \
+    wget -O ant_javacard__v_23_08_07.jar "https://github.com/martinpaljak/ant-javacard/releases/download/v23.08.07/ant-javacard.jar"; \
+    sha256sum ant_javacard__v_23_08_07.jar; \
+    echo "8f74545ed3d088625b6a2288ee96581430aeb2eddb216722ccd4fd62d6ce31e1 ant_javacard__v_23_08_07.jar" | sha256sum --check --status; \
+    mv ant_javacard__v_23_08_07.jar /opt/lib/ant_javacard__v_23_08_07.jar; \
+    wget -O javacard_kit.tar.gz "https://github.com/martinpaljak/oracle_javacard_sdks/archive/6025a1d48060b2a72df2d862de310be434f42272.tar.gz"; \
+    sha256sum javacard_kit.tar.gz; \
+    echo "b0eb5b827649245406dda721c777bf0504cde75534893a5cb5f3069d2c315da7 javacard_kit.tar.gz" | sha256sum --check --status; \
+    mkdir -p /opt/lib/javacard_kit; \
+    tar -xzf javacard_kit.tar.gz --strip-components=1 -C /opt/lib/javacard_kit; \
+    wget -O apache_ant__v_1_10_14__bin.tar.gz  "https://dlcdn.apache.org/ant/binaries/apache-ant-1.10.14-bin.tar.gz"; \
+    sha256sum apache_ant__v_1_10_14__bin.tar.gz; \
+    echo "e2852fddaaddc1ab76a099ca0d7b2ee47a907b8a91a64f70f6aa9e6a3d0dd504 apache_ant__v_1_10_14__bin.tar.gz" | sha256sum --check --status; \
+    mkdir -p /opt/lib/apache_ant__v_1_10_14; \
+    tar -xzf apache_ant__v_1_10_14__bin.tar.gz --strip-components=1 -C /opt/lib/apache_ant__v_1_10_14; \
+    wget -O openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz "https://builds.openlogic.com/downloadJDK/openlogic-openjdk/8u382-b05/openlogic-openjdk-8u382-b05-linux-x64.tar.gz"; \
+    sha256sum openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz; \
+    echo "c36376e4068253d64c4acaa863ea8f4fc40ddcbe83bc2e3dc5093a0032e1d464 openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz" | sha256sum --check --status; \
+    mkdir -p /opt/lib/openlogic_openjdk__v_8u382_b05_linux_x64; \
+    tar -xzf openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz --strip-components=1 -C /opt/lib/openlogic_openjdk__v_8u382_b05_linux_x64; \
+    wget -O 3gpp_43_019__v_600.zip "ftp://anonymous:anonymous@ftp.3gpp.org/Specs/archive/43_series/43.019/43019-600.zip"; \
+    sha256sum 3gpp_43_019__v_600.zip; \
+    echo "24140f24d4d51bf208df32320d7b7c05416d313e8a1c3491a86b1aa96072d829 3gpp_43_019__v_600.zip" | sha256sum --check --status; \
+    cd /opt/tmp; \
+    mkdir -p /opt/lib/3gpp_43_019__v_600; \
+    unzip 3gpp_43_019__v_600.zip -d /opt/lib/3gpp_43_019__v_600; \
+    cd /opt/lib/3gpp_43_019__v_600; \
+    mkdir -p /opt/lib/3gpp_43_019__v_600/annex_a_java; \
+    unzip Annex_A_java.zip; \
+    mv /opt/lib/3gpp_43_019__v_600/Annex_A_java/* /opt/lib/3gpp_43_019__v_600/annex_a_java; \
+    rm -r /opt/lib/3gpp_43_019__v_600/Annex_A_java; \
+    mkdir -p /opt/lib/3gpp_43_019__v_600/annex_b_export_files; \
+    unzip Annex_B_Export_Files.zip; \
+    mv /opt/lib/3gpp_43_019__v_600/Annex_B_Export_Files/* /opt/lib/3gpp_43_019__v_600/annex_b_export_files; \
+    rm -r /opt/lib/3gpp_43_019__v_600/Annex_B_Export_Files; \
+    cd /opt/lib/3gpp_43_019__v_600/annex_a_java; \
+    export PATH=""${PATH}":/opt/lib/openlogic_openjdk__v_8u382_b05_linux_x64/bin"; \
+    jar cf ./sim.jar ./sim;
+
+FROM base AS main
+COPY --from=download /opt/lib /opt/lib
+COPY ./entrypoint.sh /opt/entrypoint.sh
+ENTRYPOINT [ "/opt/entrypoint.sh" ]

@@ -1,0 +1,60 @@
+# docker build --progress=plain . -t tomasz-lisowski/jcflash:1.0.0 2>&1 | tee docker.log;
+# docker run --device=/dev/bus/usb/<usb_reader_path> --volume=<path_to_folder_with_cap_files>:/opt/main --tty --interactive --rm tomasz-lisowski/jcflash:1.0.0;
+
+FROM debian:12.6-slim AS base
+
+RUN set -o nounset -o errexit -o xtrace; \
+    apt-get -qq update; \
+    apt-get -qq --yes dist-upgrade; \
+    apt-get -qq --yes --no-install-recommends install libudev1 libusb-1.0-0 libccid pcscd pcsc-tools libpcsclite-dev libpcsclite1 wget ca-certificates gcc gcc-multilib libsqlite3-0 libncurses6 libreadline8 libnsl2 libtirpc3 libncursesw6 libexpat1 libexpat1-dev mime-support swig; \
+    mkdir /opt/tmp; \
+    cd /opt/tmp; \
+    wget -O libssl1_1.deb "http://ftp.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1w-0+deb11u1_amd64.deb"; \
+    sha256sum libssl1_1.deb; \
+    echo "aadf8b4b197335645b230c2839b4517aa444fd2e8f434e5438c48a18857988f7 libssl1_1.deb" | sha256sum --check --status; \
+    dpkg -i libssl1_1.deb; \
+    wget -O libffi7.deb "http://ftp.debian.org/debian/pool/main/libf/libffi/libffi7_3.3-6_amd64.deb"; \
+    sha256sum libffi7.deb; \
+    echo "30ca89bfddae5fa6e0a2a044f22b6e50cd17c4bc6bc850c579819aeab7101f0f libffi7.deb" | sha256sum --check --status; \
+    dpkg -i libffi7.deb; \
+    wget -O libpython27_minimal.deb "http://ftp.debian.org/debian/pool/main/p/python2.7/libpython2.7-minimal_2.7.18-8+deb11u1_amd64.deb"; \
+    sha256sum libpython27_minimal.deb; \
+    echo "85833c92314011b89bbead6f9a5a7a360b5ee4f9b95e001225afead4ebf9f7d3 libpython27_minimal.deb" | sha256sum --check --status; \
+    dpkg -i libpython27_minimal.deb; \
+    wget -O libpython27_stdlib.deb "http://ftp.debian.org/debian/pool/main/p/python2.7/libpython2.7-stdlib_2.7.18-8+deb11u1_amd64.deb"; \
+    sha256sum libpython27_stdlib.deb; \
+    echo "3e627d6d8992b853e000b8a4c09dda613fb767cdb711a2eac20ebc9f867b593c libpython27_stdlib.deb" | sha256sum --check --status; \
+    dpkg -i libpython27_stdlib.deb; \
+    wget -O libpython27.deb "http://ftp.debian.org/debian/pool/main/p/python2.7/libpython2.7_2.7.18-8+deb11u1_amd64.deb"; \
+    sha256sum libpython27.deb; \
+    echo "13621011f1b24bcda7c315bb2848cb447e21410870872fadd8e8c65b0dc572ef libpython27.deb" | sha256sum --check --status; \
+    dpkg -i libpython27.deb; \
+    wget -O python27_minimal.deb "http://ftp.debian.org/debian/pool/main/p/python2.7/python2.7-minimal_2.7.18-8+deb11u1_amd64.deb"; \
+    sha256sum python27_minimal.deb; \
+    echo "44f0cdc1a343303d31c55fcb3a6402cfe326adf749ec30e375e6e0c0c5f7c1f7 python27_minimal.deb" | sha256sum --check --status; \
+    dpkg -i python27_minimal.deb; \
+    wget -O python27.deb "http://ftp.debian.org/debian/pool/main/p/python2.7/python2.7_2.7.18-8+deb11u1_amd64.deb"; \
+    sha256sum python27.deb; \
+    echo "0b0b34b069d41970af75a4fe5b9012465e480fc0a0488ec16554d6299fe0b46e python27.deb" | sha256sum --check --status; \
+    dpkg -i python27.deb; \
+    wget -O libpython27_dev.deb "http://ftp.debian.org/debian/pool/main/p/python2.7/libpython2.7-dev_2.7.18-8+deb11u1_amd64.deb"; \
+    sha256sum libpython27_dev.deb; \
+    echo "887034beb360069df8b519ad93893454ef3402415775a0466940fb73d6a8b8ca libpython27_dev.deb" | sha256sum --check --status; \
+    dpkg -i libpython27_dev.deb; \
+    wget -O python27_dev.deb "http://ftp.debian.org/debian/pool/main/p/python2.7/python2.7-dev_2.7.18-8+deb11u1_amd64.deb"; \
+    sha256sum python27_dev.deb; \
+    echo "5394a986dffe6823b40a86edf4a4793e696eac097b5c9c52e3f47298f1edf51b python27_dev.deb" | sha256sum --check --status; \
+    dpkg -i python27_dev.deb; \
+    ldconfig; \
+    wget "https://bootstrap.pypa.io/pip/2.7/get-pip.py"; \
+    python2.7 get-pip.py; \
+    python2.7 -m pip install wheel==0.37.1; \
+    python2.7 -m pip install pycrypto==2.6.1 pyscard==1.9.9; \
+    wget -O sim_tools.tar.gz "https://github.com/herlesupreeth/sim-tools/archive/c7110a85344f9688591cf5a5853bfc962f9a63eb.tar.gz"; \
+    sha256sum sim_tools.tar.gz; \
+    echo "44c5530e81deeb84c4ce26ef606cad0ea02d26f5e86cf77b86cca132503e2c6b sim_tools.tar.gz" | sha256sum --check --status; \
+    mkdir -p /opt/sim_tools; \
+    tar -xzf sim_tools.tar.gz --strip-components=1 -C /opt/sim_tools;
+
+COPY ./entrypoint.sh /opt/entrypoint.sh
+ENTRYPOINT [ "/opt/entrypoint.sh" ]

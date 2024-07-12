@@ -1,0 +1,28 @@
+<project name="mycardlet" default="dist" basedir=".">
+  <description>My cardlet description.</description>
+
+  <!-- Set global properties for this build. -->
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="dist" location="dist"/>
+
+  <target name="dist">
+    <mkdir dir="${dist}"/>
+    <tstamp/>
+
+    <!-- Create the distribution. -->
+    <taskdef name="javacard" classname="pro.javacard.ant.JavaCard" classpath="/opt/lib/ant_javacard__v_23_08_07.jar"/>
+    <javacard jckit="/opt/lib/javacard_kit/jc221_kit">
+      <cap output="${dist}/MyCardlet.cap" sources="${src}" classes="${build}" version="1.0">
+        <applet class="com._1935711.mycardlet.MyCardlet" aid="D001935711000001"/>
+        <import exps="/opt/lib/3gpp_43_019__v_600/annex_b_export_files" jar="/opt/lib/3gpp_43_019__v_600/annex_a_java/sim.jar"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="clean">
+    <!-- Delete the ${build} and ${dist} directory trees. -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>
