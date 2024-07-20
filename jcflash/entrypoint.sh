@@ -6,6 +6,7 @@ readonly kic=${3:?Argument 3 missing: Expected KIC1 of the card.};
 readonly kid=${4:?Argument 4 missing: Expected KID1 of the card.};
 
 pcscd;
+pcsc_scan -n -c;
 
 case ${operation} in
     delete)
@@ -23,7 +24,8 @@ case ${operation} in
         readonly memory_volatile=${9:?Argument 9 missing: Expected volatile memory required.};
         readonly menu_height=${10:?Argument 10 missing: Expected max number of menu entries.};
         readonly menu_width=${11:?Argument 11 missing: Expected max text length of menu entry.};
-        python2.7 /opt/sim_tools/shadysim/shadysim_isim.py --pcsc="${pcsc_reader_index}" --load-app="/opt/main/"${filename}"" --install="/opt/main/"${filename}"" --kic="${kic}" --kid="${kid}" --instance-aid="${instance_aid}" --module-aid="${module_aid}" --nonvolatile-memory-required="${memory_nonvolatile}" --volatile-memory-for-install="${memory_volatile}" --enable-sim-toolkit --max-menu-entry-text="${menu_width}" --max-menu-entries="${menu_height}";
+        readonly access_domain=${12:?Argument 12 missing: Expected access domain. If you do not know what this is for, please set it to \"FF\".};
+        python2.7 /opt/sim_tools/shadysim/shadysim_isim.py --pcsc="${pcsc_reader_index}" --load-app="/opt/main/"${filename}"" --install="/opt/main/"${filename}"" --kic="${kic}" --kid="${kid}" --instance-aid="${instance_aid}" --module-aid="${module_aid}" --nonvolatile-memory-required="${memory_nonvolatile}" --volatile-memory-for-install="${memory_volatile}" --enable-sim-toolkit --max-menu-entry-text="${menu_width}" --max-menu-entries="${menu_height}" --access-domain="${access_domain}";
     ;;
 
     list)

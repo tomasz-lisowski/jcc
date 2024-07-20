@@ -19,11 +19,11 @@ Contained are 2 dockerfiles:
 
 ### Example
 1. `docker run -v ./jcc/example:/opt/main --tty --interactive --rm tomasz-lisowski/jcc:1.0.0;`.
-2. `docker run --device=/dev/bus/usb/001/007 --volume=./jcc/example/dist:/opt/main --tty --interactive --rm tomasz-lisowski/jcflash:1.0.0 install 0 3F6E30F32E6168FB5D79A9FD1049B8FA 5B62305BAFF239028F2B66CE4B7E5210 MyCardlet.cap D001935711000001 D001935711000001 00FF 00FF 1 13;`.
+2. `docker run --device=/dev/bus/usb/001/007 --volume=./jcc/example/dist:/opt/main --tty --interactive --rm tomasz-lisowski/jcflash:1.0.0 install 0 3F6E30F32E6168FB5D79A9FD1049B8FA 5B62305BAFF239028F2B66CE4B7E5210 MyCardlet.cap F1935711CCCCCCCC F1935711CCCCCCCC 00FF 00FF 1 13 FF;`.
 3. `docker run --device=/dev/bus/usb/001/007 --tty --interactive --rm tomasz-lisowski/jcflash:1.0.0 list 0 3F6E30F32E6168FB5D79A9FD1049B8FA 5B62305BAFF239028F2B66CE4B7E5210;`.
-4. `docker run --device=/dev/bus/usb/001/007 --tty --interactive --rm tomasz-lisowski/jcflash:1.0.0 delete 0 3F6E30F32E6168FB5D79A9FD1049B8FA 5B62305BAFF239028F2B66CE4B7E5210 D001935711;`.
+4. `docker run --device=/dev/bus/usb/001/007 --tty --interactive --rm tomasz-lisowski/jcflash:1.0.0 delete 0 3F6E30F32E6168FB5D79A9FD1049B8FA 5B62305BAFF239028F2B66CE4B7E5210 F1935711CC;`.
 
-**IMPORTANT: The module AID passed to the delete operation must not include the instance AID (in this case instance AID is `000001`), but when passing the module AID to the install operation, the instance AID must be included. Using our example: `D001935711000001` for installing vs. `D001935711` for deleting.**
+**IMPORTANT: The module AID passed to the delete operation must not include the instance AID (in this case instance AID is `CCCCCC`), but when passing the module AID to the install operation, the instance AID must be included. Using our example: `F1935711CCCCCCCC` for installing vs. `F1935711CC` for deleting.**
 
 *The above KIC and KID values are just realistic-looking examples, but they do not come from any real card.*
 

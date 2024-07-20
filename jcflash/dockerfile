@@ -1,6 +1,3 @@
-# docker build --progress=plain . -t tomasz-lisowski/jcflash:1.0.0 2>&1 | tee docker.log;
-# docker run --device=/dev/bus/usb/<usb_reader_path> --volume=<path_to_folder_with_cap_files>:/opt/main --tty --interactive --rm tomasz-lisowski/jcflash:1.0.0;
-
 FROM debian:12.6-slim AS base
 
 RUN set -o nounset -o errexit -o xtrace; \

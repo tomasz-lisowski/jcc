@@ -1,4 +1,4 @@
-package com._1935711.mycardlet;
+package org._1935711.mycardlet;
 
 import javacard.framework.*;
 import sim.toolkit.*;
