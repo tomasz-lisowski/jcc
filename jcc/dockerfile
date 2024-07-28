@@ -22,11 +22,11 @@ RUN set -o nounset -o errexit -o xtrace; \
     echo "e2852fddaaddc1ab76a099ca0d7b2ee47a907b8a91a64f70f6aa9e6a3d0dd504 apache_ant__v_1_10_14__bin.tar.gz" | sha256sum --check --status; \
     mkdir -p /opt/lib/apache_ant__v_1_10_14; \
     tar -xzf apache_ant__v_1_10_14__bin.tar.gz --strip-components=1 -C /opt/lib/apache_ant__v_1_10_14; \
-    wget -O openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz "https://builds.openlogic.com/downloadJDK/openlogic-openjdk/8u382-b05/openlogic-openjdk-8u382-b05-linux-x64.tar.gz"; \
-    sha256sum openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz; \
-    echo "c36376e4068253d64c4acaa863ea8f4fc40ddcbe83bc2e3dc5093a0032e1d464 openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz" | sha256sum --check --status; \
-    mkdir -p /opt/lib/openlogic_openjdk__v_8u382_b05_linux_x64; \
-    tar -xzf openlogic_openjdk__v_8u382_b05_linux_x64.tar.gz --strip-components=1 -C /opt/lib/openlogic_openjdk__v_8u382_b05_linux_x64; \
+    wget -O amazon-corretto-8-x64-linux-jdk.tar.gz "https://corretto.aws/downloads/latest/amazon-corretto-8-x64-linux-jdk.tar.gz"; \
+    sha256sum amazon-corretto-8-x64-linux-jdk.tar.gz; \
+    echo "065de7f9a700b1fb65990325f137a96ee49bed0b2be708463fe7695fcd36e0df amazon-corretto-8-x64-linux-jdk.tar.gz" | sha256sum --check --status; \
+    mkdir -p /opt/lib/amazon_corretto_8_x64_linux_jdk; \
+    tar -xzf amazon-corretto-8-x64-linux-jdk.tar.gz --strip-components=1 -C /opt/lib/amazon_corretto_8_x64_linux_jdk; \
     wget -O 3gpp_43_019__v_600.zip "ftp://anonymous:anonymous@ftp.3gpp.org/Specs/archive/43_series/43.019/43019-600.zip"; \
     sha256sum 3gpp_43_019__v_600.zip; \
     echo "24140f24d4d51bf208df32320d7b7c05416d313e8a1c3491a86b1aa96072d829 3gpp_43_019__v_600.zip" | sha256sum --check --status; \
@@ -43,7 +43,7 @@ RUN set -o nounset -o errexit -o xtrace; \
     mv /opt/lib/3gpp_43_019__v_600/Annex_B_Export_Files/* /opt/lib/3gpp_43_019__v_600/annex_b_export_files; \
     rm -r /opt/lib/3gpp_43_019__v_600/Annex_B_Export_Files; \
     cd /opt/lib/3gpp_43_019__v_600/annex_a_java; \
-    export PATH=""${PATH}":/opt/lib/openlogic_openjdk__v_8u382_b05_linux_x64/bin"; \
+    export PATH=""${PATH}":/opt/lib/amazon_corretto_8_x64_linux_jdk/bin"; \
     jar cf ./sim.jar ./sim;
 
 FROM base AS main
