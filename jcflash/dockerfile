@@ -3,7 +3,7 @@ FROM debian:12.6-slim AS base
 RUN set -o nounset -o errexit -o xtrace; \
     apt-get -qq update; \
     apt-get -qq --yes dist-upgrade; \
-    apt-get -qq --yes --no-install-recommends install libudev1 libusb-1.0-0 libccid pcscd pcsc-tools libpcsclite-dev libpcsclite1 wget ca-certificates gcc gcc-multilib libsqlite3-0 libncurses6 libreadline8 libnsl2 libtirpc3 libncursesw6 libexpat1 libexpat1-dev mime-support swig; \
+    apt-get -qq --yes --no-install-recommends install meson pkg-config cmake libudev1 libusb-1.0-0 libusb-1.0-0-dev zlib1g-dev flex libccid libacsccid1 pcscd pcsc-tools libpcsclite-dev libpcsclite1 wget ca-certificates gcc gcc-multilib libsqlite3-0 libncurses6 libreadline8 libnsl2 libtirpc3 libncursesw6 libexpat1 libexpat1-dev mime-support swig; \
     mkdir /opt/tmp; \
     cd /opt/tmp; \
     wget -O libssl1_1.deb "http://ftp.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1w-0+deb11u1_amd64.deb"; \
@@ -51,7 +51,18 @@ RUN set -o nounset -o errexit -o xtrace; \
     sha256sum sim_tools.tar.gz; \
     echo "44c5530e81deeb84c4ce26ef606cad0ea02d26f5e86cf77b86cca132503e2c6b sim_tools.tar.gz" | sha256sum --check --status; \
     mkdir -p /opt/sim_tools; \
-    tar -xzf sim_tools.tar.gz --strip-components=1 -C /opt/sim_tools;
+    tar -xzf sim_tools.tar.gz --strip-components=1 -C /opt/sim_tools; \
+    cd /opt/tmp; \
+    wget -O ccid.tar.gz "https://github.com/LudovicRousseau/CCID/archive/7baac62d9ee4f6f74e7f91a249b40045f396239d.tar.gz"; \
+    sha256sum ccid.tar.gz; \
+    echo "91d90d86b9c39342f18d8109aad1f30c7a58b4719600aaea9d45aa1cc0f37ca3 ccid.tar.gz" | sha256sum --check --status; \
+    mkdir /opt/ccid; \
+    tar -xzf ccid.tar.gz --strip-components=1 -C /opt/ccid; \
+    cd /opt/ccid; \
+    meson setup builddir; \
+    cd /opt/ccid/builddir; \
+    meson compile; \
+    meson install;
 
 COPY ./entrypoint.sh /opt/entrypoint.sh
 ENTRYPOINT [ "/opt/entrypoint.sh" ]

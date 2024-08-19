@@ -5,8 +5,13 @@ readonly pcsc_reader_index=${2:?Argument 2 missing: Expected PC/SC reader index.
 readonly kic=${3:?Argument 3 missing: Expected KIC1 of the card.};
 readonly kid=${4:?Argument 4 missing: Expected KID1 of the card.};
 
+printf "Starting PC/SC daemon.\\n";
 pcscd;
+sleep 1;
+printf "###########\\n";
+printf "Listing PC/SC readers:\\n";
 pcsc_scan -n -c;
+printf "###########\\n";
 
 case ${operation} in
     delete)
